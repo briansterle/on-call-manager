@@ -338,6 +338,68 @@ func deletePriest(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func submitActiveCall(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Error parsing form", http.StatusBadRequest)
+		return
+	}
+
+	patientName := r.FormValue("patientName")
+	address := r.FormValue("address")
+	notes := r.FormValue("notes")
+
+	// Insert the new active call into the database
+	var newCallID int
+	err = db.QueryRow(context.Background(),
+		"INSERT INTO OCM.ACTIVE_CALLS (PATIENT_NAME, ADDRESS, NOTES, OPEN_TS, STATUS) VALUES ($1, $2, $3, NOW(), 'OPEN') RETURNING ID",
+		patientName, address, notes).Scan(&newCallID)
+	if err != nil {
+		log.Printf("Error inserting new active call: %v", err)
+		http.Error(w, "Error inserting new active call", http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("New active call inserted with ID: %d", newCallID)
+
+	// Fetch the newly created active call
+	// Fetch the newly created active call
+	var newCall ActiveCall
+	err = db.QueryRow(context.Background(),
+		"SELECT ID, PATIENT_NAME, ADDRESS, NOTES, OPEN_TS, STATUS FROM OCM.ACTIVE_CALLS WHERE ID = $1",
+		newCallID).Scan(&newCall.Id, &newCall.PatientName, &newCall.Address, &newCall.Notes, &newCall.OpenTs, &newCall.Status)
+	if err != nil {
+		http.Error(w, "Error fetching new active call", http.StatusInternalServerError)
+		return
+	}
+
+	// Use the same template as in the main page
+	tmpl := template.Must(template.New("active-calls-list-element").Parse(`
+    <div class="card mb-3">
+        <div class="card-header">
+          Anointing Call
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{{ .PatientName }}</h5>
+          <p class="card-text">Address: {{ .Address }}</p>
+          <a href="#" class="btn btn-primary">Accept Call</a>
+          <a href="#" class="btn btn-secondary">Reject Call</a>
+        </div>
+    </div>
+    `))
+
+	err = tmpl.Execute(w, newCall)
+	if err != nil {
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		return
+	}
+}
+
 func main() {
 	var err error
 	db, err = pgx.Connect(context.Background(), os.Getenv("POSTGRES_URL"))
@@ -372,9 +434,11 @@ func main() {
 	r.HandleFunc("/priests/{id}", updatePriest).Methods("PUT")
 	r.HandleFunc("/priests/{id}", deletePriest).Methods("DELETE")
 
+	r.HandleFunc("/submit-active-call", submitActiveCall).Methods("POST")
+
 	fmt.Println("Server is running on http://localhost:8080")
 
-	// handler function #1 - returns the index.html template, with film data
+	// handler function #1 - returns the index.html template
 	h1 := func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.ParseFiles("index.html"))
 		activeCalls, _ := dbGetActiveCalls()

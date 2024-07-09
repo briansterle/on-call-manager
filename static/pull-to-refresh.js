@@ -1,6 +1,6 @@
 let startY;
 let pullDistance = 0;
-const pullThreshold = 20;
+const pullThreshold = 80;
 const indicator = document.getElementById('pull-to-refresh-indicator');
 const pullMessage = document.getElementById('pull-message');
 const refreshSpinner = document.getElementById('refresh-spinner');

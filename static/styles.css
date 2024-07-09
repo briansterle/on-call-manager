@@ -22,7 +22,7 @@ html, body {
     }
 }
 
-#pull-to-refresh-indicator {
+/* #pull-to-refresh-indicator {
     position: fixed;
     top: 0;
     left: 0;
@@ -50,4 +50,4 @@ html, body {
 
 body {
     padding-top: env(safe-area-inset-top);
-}
+} */
