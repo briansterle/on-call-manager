@@ -21,3 +21,33 @@ html, body {
         padding-right: 10px;
     }
 }
+
+#pull-to-refresh-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    height: 50px;
+    line-height: 50px;
+    background-color: #f8f9fa;
+    transition: transform 0.3s;
+    z-index: 1000;
+    padding-top: env(safe-area-inset-top);
+    transform: translateY(calc(-100% - env(safe-area-inset-top)));
+}
+
+#refresh-spinner {
+    display: inline-block;
+    font-size: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+body {
+    padding-top: env(safe-area-inset-top);
+}
