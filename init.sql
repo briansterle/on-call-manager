@@ -71,9 +71,9 @@ INSERT INTO OCM.PRIESTS (NAME) VALUES
 -- Insert sample data into OCM.ACTIVE_CALLS
 INSERT INTO OCM.ACTIVE_CALLS (ADDRESS, PATIENT_NAME, OPEN_TS, CLOSED_TS, RESPONDER_ID, STATUS, NOTES) VALUES
 ('123 Main St, Cityville', 'Alice Johnson', CURRENT_TIMESTAMP - INTERVAL '2 hours', NULL, 1, 'RESPONDING', 'Patient requesting last rites'),
-('456 Elm St, Townsburg', 'Bob Smith', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP - INTERVAL '23 hours', 2, 'CLOSED', 'Administered sacrament of the sick'),
-('789 Oak Ave, Villageton', 'Carol Davis', CURRENT_TIMESTAMP - INTERVAL '30 minutes', NULL, 3, 'OPEN', 'Family requesting priest for blessing'),
-('321 Pine Rd, Hamletville', 'David Brown', CURRENT_TIMESTAMP - INTERVAL '4 hours', NULL, 4, 'RESPONDING', 'Emergency call from hospital'),
+-- ('456 Elm St, Townsburg', 'Bob Smith', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP - INTERVAL '23 hours', 2, 'CLOSED', 'Administered sacrament of the sick'),
+-- ('789 Oak Ave, Villageton', 'Carol Davis', CURRENT_TIMESTAMP - INTERVAL '30 minutes', NULL, 3, 'OPEN', 'Family requesting priest for blessing'),
+-- ('321 Pine Rd, Hamletville', 'David Brown', CURRENT_TIMESTAMP - INTERVAL '4 hours', NULL, 4, 'RESPONDING', 'Emergency call from hospital'),
 ('654 Maple Ln, Boroughburg', 'Eve Wilson', CURRENT_TIMESTAMP - INTERVAL '15 minutes', NULL, NULL, 'OPEN', 'New call, awaiting responder');
 
 -- Insert sample data into OCM.ON_CALL

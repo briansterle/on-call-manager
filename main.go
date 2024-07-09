@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -54,14 +55,9 @@ func initDB(db *pgx.Conn) error {
 	return err
 }
 
-// ActiveCalls CRUD
-func getActiveCalls(w http.ResponseWriter, r *http.Request) {
+func dbGetActiveCalls() ([]ActiveCall, error) {
 	var activeCalls []ActiveCall
 	rows, err := db.Query(context.Background(), "SELECT * FROM OCM.ACTIVE_CALLS")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	defer rows.Close()
 
 	for rows.Next() {
@@ -78,10 +74,20 @@ func getActiveCalls(w http.ResponseWriter, r *http.Request) {
 			&ac.Notes,
 		)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return activeCalls, err
 		}
 		activeCalls = append(activeCalls, ac)
+	}
+
+	return activeCalls, err
+}
+
+// ActiveCalls CRUD
+func getActiveCalls(w http.ResponseWriter, r *http.Request) {
+	activeCalls, err := dbGetActiveCalls()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -367,5 +373,18 @@ func main() {
 	r.HandleFunc("/priests/{id}", deletePriest).Methods("DELETE")
 
 	fmt.Println("Server is running on http://localhost:8080")
+
+	// handler function #1 - returns the index.html template, with film data
+	h1 := func(w http.ResponseWriter, r *http.Request) {
+		tmpl := template.Must(template.ParseFiles("index.html"))
+		activeCalls, _ := dbGetActiveCalls()
+		data := map[string][]ActiveCall{"ActiveCalls": activeCalls}
+		tmpl.Execute(w, data)
+	}
+
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	r.HandleFunc("/", h1)
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
